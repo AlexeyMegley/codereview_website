@@ -1,4 +1,16 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %} Log In {% endblock %}
-{% block content %} Login page {% endblock %}
+{% block content %} 
+<div class="container authorization_box">
+<link rel="stylesheet" href ="{% static 'users/css/authorization.css' %}">
+<h2>Login</h2>
+<form method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit">Login</button>
+</form>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,8 @@
+
+.authorization_box {
+	margin-top: 5vh;
+	background-color: #272822;
+	font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+	color: #F8F8F2;
+	border-radius: 20px;
+}
