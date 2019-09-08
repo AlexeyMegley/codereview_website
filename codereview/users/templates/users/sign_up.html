@@ -4,14 +4,14 @@
 {% block content %}
 <div class="container authorization_box">
 <link rel="stylesheet" href ="{% static 'users/css/authorization.css' %}">
-<h2>Sign up</h2>
-<form method="post">
-	{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign Up</button>
-</form>
-<br>
-<p><strong>-- OR --</strong></p>
-<a href="{% url 'social:begin' 'github' %}">Login with GitHub</a><br>
+<h2 class="centered">Sign up with Github</h2>
+<h6>
+	It will be used to extract your code from public repositories.
+	If you don't have any projects uploaded on github, you can
+	see other code, but can't review or get reviews :-(
+</h6>
+<a href="{% url 'social:begin' 'github' %}">
+<img src="{% static 'img/GitHub_Mark.png' %}" alt='...' class="github_icon">
+</a>
 </div>
  {% endblock %}

@@ -7,6 +7,11 @@ class Skill(models.Model):
     level = models.IntegerField(validators=[MaxValueValidator(10), MinValueValidator(1)])
 
 
+class SkillRating(models.Model):
+	skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+	rating = models.FloatField(validators=[MaxValueValidator(10), MinValueValidator(1)])
+
+
 class GithubProject(models.Model):
 	skill = models.ManyToManyField(Skill, related_name='performed_projects')
 	url = models.SlugField(unique=True)

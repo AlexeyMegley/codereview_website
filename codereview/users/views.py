@@ -1,25 +1,20 @@
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from .forms import ProgrammerCreationForm, ProgrammerLoginForm
 
 # Create your views here.
 
 def index(request):
-	return render(request, 'base.html')
+    return render(request, 'base.html')
 
-def login(request):
-	if request.method == 'POST':
-		pass
-	login_form = ProgrammerLoginForm()
-	return render(request, 'users/login.html', {'form': login_form})
+def log_in(request):
+    return render(request, 'users/login.html')
 
 @login_required
-def logout(request):
-	logout(request)
-	return redirect(reverse('login'))
+def log_out(request):
+    logout(request)
+    return redirect(settings.LOGOUT_REDIRECT_URL)
 
 def sign_up(request):
-	creation_form = ProgrammerCreationForm()
-	return render(request, 'users/sign_up.html', {'form': creation_form})
+    return render(request, 'users/sign_up.html')

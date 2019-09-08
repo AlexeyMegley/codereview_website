@@ -54,3 +54,11 @@ footer h6 {
     height: 850px;
     font-size: 16px;
 }
+
+.centered {
+	text-align: center;
+}
+
+.github_icon {
+	margin: 0 43%;
+}

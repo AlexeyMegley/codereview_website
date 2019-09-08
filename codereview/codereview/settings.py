@@ -104,17 +104,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTHENTICATION_BACKENDS = (
- 'social_core.backends.github.GithubOAuth2',
+AUTH_USER_MODEL = 'users.Programmer'
 
+AUTHENTICATION_BACKENDS = (
  'django.contrib.auth.backends.ModelBackend',
+ 'social_core.backends.github.GithubOAuth2',
 )
 
 SOCIAL_AUTH_GITHUB_KEY = config('SOCIAL_AUTH_GITHUB_KEY')
 SOCIAL_AUTH_GITHUB_SECRET = config('SOCIAL_AUTH_GITHUB_SECRET')
 
-LOGIN_REDIRECT_URL = 'login'
-LOGOUT_REDIRECT_URL = 'index'
+LOGIN_REDIRECT_URL = 'users:index'
+LOGOUT_REDIRECT_URL = 'users:login'
 
 
 # Internationalization

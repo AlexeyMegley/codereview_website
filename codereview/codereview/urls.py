@@ -18,6 +18,6 @@ from django.urls import path, include, re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('users.urls')),
+    path('', include('users.urls', namespace='users')),
     re_path(r'^oauth/', include('social_django.urls', namespace='social')),
 ]
