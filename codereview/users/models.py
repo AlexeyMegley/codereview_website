@@ -1,10 +1,18 @@
+import threading
+from datetime import date
+
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from .managers import ProgrammerManager
-from skills.models import Skill, SkillRating, GithubProject
+from skills.models import Skill, SkillRating
+from projects.models import GithubProject
+from projects.exceptions import LanguageValidationError
 from snippets.models import Snippet
+from github_api.github_api_helpers import fetch_user_repo_data
 
 
 class Programmer(AbstractBaseUser, PermissionsMixin):
@@ -24,18 +32,43 @@ class Programmer(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     class Meta:
-    	verbose_name = 'programmer'
-    	verbose_name_plural = 'programmers'
-
-    def get_full_name(self):
-    	return 'Full Name'
+        verbose_name = 'programmer'
+        verbose_name_plural = 'programmers'
 
     def get_short_name(self):
-    	return 'Short Name'
+        return self.github_account
 
-    def update_user_skills(self):
-    	""" Necessary data will be taken from github_account """
-    	return
+    def get_full_name(self):
+        return self.get_short_name()
+
+    def fill_github_data(self):
+        user_projects = fetch_user_repo_data(self.github_account)
+        first_commit = date.today()
+        for project in user_projects:
+            print(project)
+            language = project['language']
+            project_url = project['url']
+            last_project_commit = project['updated_at']
+            first_commit = min(first_commit, project['created_at'])
+            try:
+                print("Creating...", language, project_url, last_project_commit)
+                project = GithubProject.objects.create_project(language, project_url, last_project_commit)
+                self.github_projects.add(project)
+            except LanguageValidationError:
+                # TODO Log will be here soon...
+                print(f"'{language}' is not supported. Maybe add support for it?")
+
+        self.first_commit = first_commit
+        self.save()
+
+    def sync_github_data(self):
+        pass
+
+    def sync_github_data_in_bg(self):
+        """ Fetch user data from github and sync it with data in the database """
+        t = threading.Thread(target=self.sync_github_data, args=(), kwargs={})
+        t.setDaemon(True)
+        t.start()
 
 
 class UserSettings(models.Model):
@@ -44,3 +77,10 @@ class UserSettings(models.Model):
     review_skills = models.ManyToManyField(Skill)
     review_projects = models.ManyToManyField(GithubProject)
 
+
+@receiver(post_save, sender=Programmer, dispatch_uid='fill_github_data_in_bg_count')
+def fill_github_data_in_bg(sender, instance, **kwargs):
+    if instance.pk is None:
+        t = threading.Thread(target=instance.fill_github_data, args=(), kwargs={})
+        t.setDaemon(True)
+        t.start()

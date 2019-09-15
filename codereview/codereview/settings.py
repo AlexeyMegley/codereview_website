@@ -34,8 +34,9 @@ INSTALLED_APPS = [
     'social_django',
     'users.apps.UsersConfig',
     'skills.apps.SkillsConfig',
+    'projects.apps.ProjectsConfig',
     'snippets.apps.SnippetsConfig',
-    'reviews.apps.ReviewsConfig'
+    'reviews.apps.ReviewsConfig',
 ]
 
 MIDDLEWARE = [

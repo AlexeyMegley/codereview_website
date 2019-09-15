@@ -1,0 +1,2 @@
+class LanguageValidationError(Exception):
+	pass

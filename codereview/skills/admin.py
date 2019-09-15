@@ -4,4 +4,3 @@ from .models import *
 
 admin.site.register(Skill)
 admin.site.register(SkillRating)
-admin.site.register(GithubProject)
