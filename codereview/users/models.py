@@ -35,6 +35,7 @@ class Programmer(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'programmer'
         verbose_name_plural = 'programmers'
 
+    
     def get_short_name(self):
         return self.github_account
 
@@ -45,13 +46,11 @@ class Programmer(AbstractBaseUser, PermissionsMixin):
         user_projects = fetch_user_repo_data(self.github_account)
         first_commit = date.today()
         for project in user_projects:
-            print(project)
             language = project['language']
             project_url = project['url']
             last_project_commit = project['updated_at']
             first_commit = min(first_commit, project['created_at'])
             try:
-                print("Creating...", language, project_url, last_project_commit)
                 project = GithubProject.objects.create_project(language, project_url, last_project_commit)
                 self.github_projects.add(project)
             except LanguageValidationError:
@@ -80,7 +79,9 @@ class UserSettings(models.Model):
 
 @receiver(post_save, sender=Programmer, dispatch_uid='fill_github_data_in_bg_count')
 def fill_github_data_in_bg(sender, instance, **kwargs):
-    if instance.pk is None:
-        t = threading.Thread(target=instance.fill_github_data, args=(), kwargs={})
+    # Start operation on new users or users, which still have no projects on github
+    # TODO - use Celery later
+    if not instance.github_projects.exists():
+        t = threading.Thread(name="bg_thread", target=instance.fill_github_data, args=(), kwargs={})
         t.setDaemon(True)
         t.start()

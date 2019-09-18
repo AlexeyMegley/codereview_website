@@ -7,7 +7,7 @@ class Skill(models.Model):
 
 
 class SkillRating(models.Model):
-	skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-	rating = models.FloatField(validators=[MaxValueValidator(10), MinValueValidator(1)])
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    rating = models.FloatField(validators=[MaxValueValidator(10), MinValueValidator(1)])
 
     

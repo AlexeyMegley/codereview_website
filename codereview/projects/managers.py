@@ -10,7 +10,7 @@ class GithubProjectManager(models.Manager):
         if language and language.lower() in FILE_EXTENSIONS:
             skill, _ = Skill.objects.get_or_create(name=language.lower())
             project = self.model(skill=skill, url=url, last_commit=last_commit)
-            project.save(force_insert=True)
+            project.save()
             return project
         raise LanguageValidationError('Project language has no support')
 
