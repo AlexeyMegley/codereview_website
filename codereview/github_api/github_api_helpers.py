@@ -1,4 +1,6 @@
 import requests
+import asyncio
+import aiohttp
 from datetime import datetime
 
 from django.conf import settings
@@ -45,16 +47,35 @@ FILE_EXTENSIONS = {
 }
 
 
-def fetch_user_repo_data(github_username: str) -> [dict]:
+def get_necessary_data(raw_data: [dict]) -> [dict]:
+    return [
+                {
+                  'created_at': datetime.strptime(project['created_at'], DATETIME_GITHUB_FORMAT).date(), 
+                  'updated_at': datetime.strptime(project['updated_at'], DATETIME_GITHUB_FORMAT).date(),
+                  'language': project['language'], 
+                  'url': project['url']
+                } 
+                for project in raw_data
+            ]
+
+
+def fetch_user_repo_data(github_username: str) -> {str: [dict]}:
     url = f'{BASE_API_URL}/users/{github_username}/repos'
     raw_data = requests.get(url, data={'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET}).json()
-    prepared_data = [
-                        {
-                          'created_at': datetime.strptime(project['created_at'], DATETIME_GITHUB_FORMAT).date(), 
-                          'updated_at': datetime.strptime(project['updated_at'], DATETIME_GITHUB_FORMAT).date(),
-                          'language': project['language'], 
-                          'url': project['url']
-                        } 
-                        for project in raw_data
-                    ]
-    return prepared_data
+    return get_necessary_data(raw_data)
+
+
+async def fetch_user_repo_data_async(github_username: str, session: aiohttp.ClientSession) -> [dict]:
+    url = f'{BASE_API_URL}/users/{github_username}/repos'
+    resp = await session.request(method="GET", url=url, headers={'client_id': CLIENT_ID,
+                                                                 'client_secret': CLIENT_SECRET})
+    resp.raise_for_status()
+    raw_data = await resp.json()
+    return {github_username: get_necessary_data(raw_data)}
+
+
+async def get_users_projects(github_usernames: [str]) -> [{str: [dict]}]:
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_user_repo_data_async(account, session)
+                 for account in github_usernames]
+        return await asyncio.gather(*tasks)

@@ -4,8 +4,6 @@ from datetime import date
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 from .managers import ProgrammerManager
 from skills.models import Skill, SkillRating
@@ -34,6 +32,16 @@ class Programmer(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'programmer'
         verbose_name_plural = 'programmers'
+
+    def save(self, *args, **kwargs):
+        # If the user is new, save user and start filling user data from github
+        if self.pk is None:
+            super(Programmer, self).save(*args, **kwargs)
+            t = threading.Thread(name="bg_thread", target=self.fill_github_data, args=(), kwargs={})
+            t.setDaemon(True)
+            t.start()
+        else:
+            super(Programmer, self).save(*args, **kwargs)
 
     
     def get_short_name(self):
@@ -75,13 +83,3 @@ class UserSettings(models.Model):
     review_code_from_date = models.DateField()
     review_skills = models.ManyToManyField(Skill)
     review_projects = models.ManyToManyField(GithubProject)
-
-
-@receiver(post_save, sender=Programmer, dispatch_uid='fill_github_data_in_bg_count')
-def fill_github_data_in_bg(sender, instance, **kwargs):
-    # Start operation on new users or users, which still have no projects on github
-    # TODO - use Celery later
-    if not instance.github_projects.exists():
-        t = threading.Thread(name="bg_thread", target=instance.fill_github_data, args=(), kwargs={})
-        t.setDaemon(True)
-        t.start()
