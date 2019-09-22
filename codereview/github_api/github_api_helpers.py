@@ -9,6 +9,7 @@ from django.conf import settings
 BASE_API_URL = 'https://api.github.com'
 CLIENT_ID = settings.SOCIAL_AUTH_GITHUB_KEY
 CLIENT_SECRET = settings.SOCIAL_AUTH_GITHUB_SECRET
+COMMITS_TO_FETCH = 100
 DATETIME_GITHUB_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 FILE_EXTENSIONS = {
     'python': 'py',
@@ -52,7 +53,7 @@ def get_necessary_data(raw_data: [dict]) -> [dict]:
                 {
                   'created_at': datetime.strptime(project['created_at'], DATETIME_GITHUB_FORMAT).date(), 
                   'updated_at': datetime.strptime(project['updated_at'], DATETIME_GITHUB_FORMAT).date(),
-                  'language': project['language'], 
+                  'language': project['language'],
                   'url': project['url']
                 } 
                 for project in raw_data

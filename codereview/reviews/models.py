@@ -5,7 +5,7 @@ from projects.models import GithubProject
 
 
 class CodeFile(models.Model):
-	github_url = models.URLField(max_length=255, unique=True)
+    github_url = models.URLField(max_length=255, unique=True)
     author = models.ForeignKey(Programmer, on_delete=models.CASCADE)
     project = models.ForeignKey(GithubProject, on_delete=models.CASCADE)
     rating = models.FloatField(validators=[MaxValueValidator(10), MinValueValidator(1)])
